@@ -1,35 +1,31 @@
 export interface EventOptions {
+	intents?: number;
 
-    intents?: number;
+	execute({
+		settings,
 
-    execute ({
+		loadedEvents,
+		loadedServices,
+		loadedChatInputCommands,
+		loadedMessageContextMenuCommands,
+		loadedUserContextMenuCommands,
 
-        settings,
-
-        loadedEvents,
-        loadedServices,
-        loadedChatInputCommands,
-        loadedMessageContextMenuCommands,
-        loadedUserContextMenuCommands,
-
-        usedEvents,
-        usedIntents
-    }): Promise<void> | void
+		usedEvents,
+		usedIntents,
+	}): Promise<void> | void;
 }
 
 export class EventBuilder {
+	type = 1;
 
-    type = 1;
+	// https://discord.com/developers/docs/topics/gateway#gateway-intents
+	intents = 0;
 
-    // https://discord.com/developers/docs/topics/gateway#gateway-intents
-    intents = 0;
+	execute;
 
-    execute;
+	constructor(data: EventOptions) {
+		this.intents = data.intents ?? this.intents;
 
-    constructor (data: EventOptions) {
-
-        this.intents = data.intents ?? this.intents;
-
-        this.execute = data.execute;
-    }
+		this.execute = data.execute;
+	}
 }

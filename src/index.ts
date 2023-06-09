@@ -14,58 +14,51 @@ export * from './structures/UserContextMenuCommand.js';
 export * from './structures/MessageContextMenuCommand.js';
 
 export default async function (settings: Required<SettingsOptions>) {
+	const {
+		loadedEvents,
+		loadedServices,
+		loadedChatInputCommands,
+		loadedUserContextMenuCommands,
+		loadedMessageContextMenuCommands,
+	} = await loadFiles(settings.include, settings.exclude);
 
-    const {
+	const usedEvents = findUsedEvents(
+		loadedEvents,
+		loadedServices,
+		loadedChatInputCommands,
+		loadedUserContextMenuCommands,
+		loadedMessageContextMenuCommands,
+	);
 
-        loadedEvents,
-        loadedServices,
-        loadedChatInputCommands,
-        loadedUserContextMenuCommands,
-        loadedMessageContextMenuCommands
-    } = await loadFiles(settings.include, settings.exclude);
+	const { usedIntents } = findUsedGateways(loadedEvents, usedEvents);
 
-    const usedEvents = findUsedEvents(
+	for (const loadedEvent of loadedEvents) {
+		if (!usedEvents[loadedEvent.metadata.name]) continue;
 
-        loadedEvents,
-        loadedServices,
-        loadedChatInputCommands,
-        loadedUserContextMenuCommands,
-        loadedMessageContextMenuCommands
-    );
+		loadedEvent.execute({
+			settings,
 
-    const { usedIntents } = findUsedGateways(loadedEvents, usedEvents);
+			loadedEvents,
+			loadedServices,
+			loadedChatInputCommands,
+			loadedMessageContextMenuCommands,
+			loadedUserContextMenuCommands,
 
-    for (const loadedEvent of loadedEvents) {
+			usedEvents,
+			usedIntents,
 
-        if (!usedEvents[loadedEvent.metadata.name]) continue;
+			session: new Session(
+				settings.session({
+					loadedEvents,
+					loadedServices,
+					loadedChatInputCommands,
+					loadedMessageContextMenuCommands,
+					loadedUserContextMenuCommands,
 
-        loadedEvent.execute({
-
-            settings,
-
-            loadedEvents,
-            loadedServices,
-            loadedChatInputCommands,
-            loadedMessageContextMenuCommands,
-            loadedUserContextMenuCommands,
-
-            usedEvents,
-            usedIntents,
-
-            session: new Session(
-
-                settings.session({
-
-                    loadedEvents,
-                    loadedServices,
-                    loadedChatInputCommands,
-                    loadedMessageContextMenuCommands,
-                    loadedUserContextMenuCommands,
-
-                    usedEvents,
-                    usedIntents
-                })
-            )
-        });
-    }
+					usedEvents,
+					usedIntents,
+				}),
+			),
+		});
+	}
 }

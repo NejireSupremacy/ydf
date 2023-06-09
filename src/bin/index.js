@@ -2,34 +2,41 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 switch (process.argv.at(2)) {
+	case 'init': {
+		const folder = process.argv.at(3) ?? 'new-ydf-project';
 
-    case 'init': {
+		await fs.mkdir(path.join(process.cwd(), folder, 'src', 'events'), {
+			recursive: true,
+		});
+		await fs.mkdir(path.join(process.cwd(), folder, 'src', 'services'), {
+			recursive: true,
+		});
+		await fs.mkdir(path.join(process.cwd(), folder, 'src', 'commands'), {
+			recursive: true,
+		});
 
-        const folder = process.argv.at(3) ?? 'new-ydf-project';
+		await fs.writeFile(
+			path.join(process.cwd(), folder, '.ydf.config.js'),
+			"import { SettingsBuilder } from 'ydf';\n\nexport default new SettingsBuilder ({ session ({ usedIntents, usedPartials }) { return { intents: usedIntents, partials: usedPartials, token: 'BOT TOKEN' }; } });\n",
+		);
 
-        await fs.mkdir(path.join(process.cwd(), folder, 'src', 'events'),   { recursive: true });
-        await fs.mkdir(path.join(process.cwd(), folder, 'src', 'services'), { recursive: true });
-        await fs.mkdir(path.join(process.cwd(), folder, 'src', 'commands'), { recursive: true });
+		break;
+	}
 
-        await fs.writeFile(path.join(process.cwd(), folder, '.ydf.config.js'), 'import { SettingsBuilder } from \'ydf\';\n\nexport default new SettingsBuilder ({ session ({ usedIntents, usedPartials }) { return { intents: usedIntents, partials: usedPartials, token: \'BOT TOKEN\' }; } });\n');
+	case 'deploy': {
+		const { default: settings } = await import(
+			`file:///${path.resolve(process.argv.at(3) ?? '.ydf.config.js')}`
+		);
 
-        break;
-    }
+		const { default: environment } = await import('../index.js');
 
-    case 'deploy': {
+		await environment(settings);
 
-        const { default: settings } = await import(`file:///${ path.resolve(process.argv.at(3) ?? '.ydf.config.js') }`);
+		break;
+	}
 
-        const { default: environment } = await import('../index.js');
+	default:
+		console.log('Repository on https://github.com/kh0wel/ydf');
 
-        await environment(settings);
-
-        break;
-    }
-
-    default:
-
-        console.log('Repository on https://github.com/kh0wel/ydf');
-
-        break;
+		break;
 }

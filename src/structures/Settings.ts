@@ -1,44 +1,39 @@
-import { BiscuitOptions } from "@biscuitland/core";
+import { BiscuitOptions } from '@biscuitland/core';
 
 export interface SettingsOptions {
+	session({
+		loadedEvents,
+		loadedServices,
+		loadedChatInputCommands,
+		loadedMessageContextMenuCommands,
+		loadedUserContextMenuCommands,
 
-    session ({
+		usedEvents,
+		usedIntents,
+	}): BiscuitOptions;
 
-        loadedEvents,
-        loadedServices,
-        loadedChatInputCommands,
-        loadedMessageContextMenuCommands,
-        loadedUserContextMenuCommands,
+	include?: string[];
 
-        usedEvents,
-        usedIntents
-    }): BiscuitOptions;
-
-    include?: string[];
-
-    exclude?: string[];
+	exclude?: string[];
 }
 
 export class SettingsBuilder {
+	session;
 
-    session;
+	include = [
+		'src/**/*.event.*',
+		'src/**/*.service.*',
+		'src/**/*.command.chat.*',
+		'src/**/*.command.user.*',
+		'src/**/*.command.message.*',
+	];
 
-    include = [
+	exclude: string[] = [];
 
-        'src/**/*.event.*',
-        'src/**/*.service.*',
-        'src/**/*.command.chat.*',
-        'src/**/*.command.user.*',
-        'src/**/*.command.message.*',
-    ];
+	constructor(data: SettingsOptions) {
+		this.session = data.session;
 
-    exclude: string[] = [];
-
-    constructor (data: SettingsOptions) {
-
-        this.session = data.session;
-
-        this.include = data.include ?? this.include;
-        this.exclude = data.exclude ?? this.exclude;
-    }
+		this.include = data.include ?? this.include;
+		this.exclude = data.exclude ?? this.exclude;
+	}
 }

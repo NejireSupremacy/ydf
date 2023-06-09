@@ -1,34 +1,32 @@
 export default function (
-
-    loadedEvents,
-    loadedServices,
-    loadedChatInputCommands,
-    loadedMessageContextMenuCommands,
-    loadedUserContextMenuCommands
+	loadedEvents,
+	loadedServices,
+	loadedChatInputCommands,
+	loadedMessageContextMenuCommands,
+	loadedUserContextMenuCommands,
 ) {
+	const usedEvents = {};
 
-    const usedEvents = {};
+	for (const loadedEvent of loadedEvents) {
+		const byServices = loadedServices.filter(
+			(data) => data.events[loadedEvent.metadata.name],
+		);
 
-    for (const loadedEvent of loadedEvents) {
+		const byCommands = loadedChatInputCommands
+			.concat(loadedUserContextMenuCommands)
+			.concat(loadedMessageContextMenuCommands)
+			.filter((data) => data.events[loadedEvent.metadata.name]);
 
-        const byServices = loadedServices.filter((data) => data.events[loadedEvent.metadata.name]);
+		const byAll = byServices.concat(byCommands);
 
-        const byCommands = loadedChatInputCommands
-            .concat(loadedUserContextMenuCommands)
-            .concat(loadedMessageContextMenuCommands)
-            .filter((data) => data.events[loadedEvent.metadata.name]);
+		if (!byAll.length) continue;
 
-        const byAll = byServices.concat(byCommands);
+		usedEvents[loadedEvent.metadata.name] = {
+			services: byServices,
+			commands: byCommands,
+			all: byAll,
+		};
+	}
 
-        if (!byAll.length) continue;
-
-        usedEvents[loadedEvent.metadata.name] = {
-
-            services: byServices,
-            commands: byCommands,
-            all:      byAll
-        };
-    }
-
-    return usedEvents;
+	return usedEvents;
 }

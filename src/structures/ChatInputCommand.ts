@@ -1,103 +1,95 @@
 export interface ChatInputCommandOptions {
+	intents?: number;
 
-    intents?: number;
+	display: {
+		name: {
+			default: string;
 
-    display: {
+			[locale: string]: string;
+		};
 
-        name: {
+		description: {
+			default: string;
 
-            default: string;
+			[locale: string]: string;
+		};
 
-            [locale: string]: string;
-        };
+		options?;
 
-        description: {
+		permissions?: {
+			member?: bigint | null;
 
-            default: string;
+			dm?: boolean;
+			nsfw?: boolean;
+		};
+	};
 
-            [locale: string]: string;
-        };
-
-        options?;
-
-        permissions?: {
-
-            member?: bigint | null;
-
-            dm?:   boolean;
-            nsfw?: boolean;
-        };
-    };
-
-    events: { [event: string]: (parameters) => Promise<void> | void; };
+	events: { [event: string]: (parameters) => Promise<void> | void };
 }
 
 export class ChatInputCommandBuilder {
+	type = 3;
 
-    type = 3;
+	// https://discord.com/developers/docs/topics/gateway#gateway-intents
+	intents = 0;
 
-    // https://discord.com/developers/docs/topics/gateway#gateway-intents
-    intents = 0; 
+	display: {
+		type: number;
 
-    display: {
+		name: {
+			default: string;
 
-        type: number;
+			[locale: string]: string;
+		};
 
-        name: {
+		description: {
+			default: string;
 
-            default: string;
+			[locale: string]: string;
+		};
 
-            [locale: string]: string;
-        };
+		options;
 
-        description: {
+		permissions: {
+			member: bigint | null;
 
-            default: string;
+			dm: boolean;
+			nsfw: boolean;
+		};
+	} = {
+		// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
+		type: 1,
 
-            [locale: string]: string;
-        };
+		name: { default: 'empty' },
+		description: { default: 'empty' },
 
-        options;
+		options: [],
 
-        permissions: {
+		permissions: {
+			member: null,
 
-            member: bigint | null;
+			dm: false,
+			nsfw: false,
+		},
+	};
 
-            dm:   boolean;
-            nsfw: boolean;
-        };
-    } = {
+	events;
 
-        // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
-        type: 1,
+	constructor(data: ChatInputCommandOptions) {
+		this.intents = data.intents ?? this.intents;
 
-        name: { default: 'empty' }, description: { default: 'empty' },
+		this.display.name = data.display.name;
+		this.display.description = data.display.description;
 
-        options: [],
+		this.display.options = data.display.options ?? this.display.options;
 
-        permissions: {
+		this.display.permissions.member =
+			data.display.permissions?.member ?? this.display.permissions.member;
+		this.display.permissions.dm =
+			data.display.permissions?.dm ?? this.display.permissions.dm;
+		this.display.permissions.nsfw =
+			data.display.permissions?.nsfw ?? this.display.permissions.nsfw;
 
-            member: null,
-
-            dm: false, nsfw: false
-        }
-    };
-
-    events;
-
-    constructor (data: ChatInputCommandOptions) {
-
-        this.intents = data.intents ?? this.intents;
-
-        this.display.name        = data.display.name;
-        this.display.description = data.display.description;
-
-        this.display.options = data.display.options ?? this.display.options;
-
-        this.display.permissions.member = data.display.permissions?.member ?? this.display.permissions.member;
-        this.display.permissions.dm     = data.display.permissions?.dm     ?? this.display.permissions.dm;
-        this.display.permissions.nsfw   = data.display.permissions?.nsfw   ?? this.display.permissions.nsfw;
-
-        this.events = data.events;
-    }
+		this.events = data.events;
+	}
 }

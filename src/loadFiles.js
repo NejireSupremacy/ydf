@@ -3,109 +3,90 @@ import path from 'node:path';
 import fglob from 'fast-glob';
 
 export default async function (target, ignore) {
+	const loadedEvents = [];
+	const loadedServices = [];
+	const loadedChatInputCommands = [];
+	const loadedUserContextMenuCommands = [];
+	const loadedMessageContextMenuCommands = [];
 
-    const loadedEvents                     = [];
-    const loadedServices                   = [];
-    const loadedChatInputCommands          = [];
-    const loadedUserContextMenuCommands    = [];
-    const loadedMessageContextMenuCommands = [];
+	const mapedFiles = await fglob(target, { ignore, dot: true, absolute: true });
 
-    const mapedFiles = await fglob(target, { ignore, dot: true, absolute: true });
+	for (const mapedFile of mapedFiles) {
+		const { default: data } = await import(`file:///${mapedFile}`);
 
-    for (const mapedFile of mapedFiles) {
+		switch (data.type) {
+			case 1:
+				loadedEvents.push({
+					...data,
 
-        const { default: data } = await import(`file:///${ mapedFile }`);
+					metadata: {
+						name: path.basename(mapedFile).replace(/\..+$/g, ''),
 
-        switch (data.type) {
+						path: mapedFile,
+					},
+				});
 
-            case 1:
+				break;
 
-                loadedEvents.push({
+			case 2:
+				loadedServices.push({
+					...data,
 
-                    ... data,
+					metadata: {
+						name: path.basename(mapedFile).replace(/\..+$/g, ''),
 
-                    metadata: {
+						path: mapedFile,
+					},
+				});
 
-                        name: path.basename(mapedFile).replace(/\..+$/g, ''),
+				break;
 
-                        path: mapedFile
-                    }
-                });
+			case 3:
+				loadedChatInputCommands.push({
+					...data,
 
-                break;
+					metadata: {
+						name: path.basename(mapedFile).replace(/\..+$/g, ''),
 
-            case 2:
+						path: mapedFile,
+					},
+				});
 
-                loadedServices.push({
+				break;
 
-                    ... data,
+			case 4:
+				loadedUserContextMenuCommands.push({
+					...data,
 
-                    metadata: {
+					metadata: {
+						name: path.basename(mapedFile).replace(/\..+$/g, ''),
 
-                        name: path.basename(mapedFile).replace(/\..+$/g, ''),
+						path: mapedFile,
+					},
+				});
 
-                        path: mapedFile
-                    }
-                });
+				break;
 
-                break;
+			case 5:
+				loadedMessageContextMenuCommands.push({
+					...data,
 
-            case 3:
+					metadata: {
+						name: path.basename(mapedFile).replace(/\..+$/g, ''),
 
-                loadedChatInputCommands.push({
+						path: mapedFile,
+					},
+				});
 
-                    ... data,
+				break;
+		}
+	}
 
-                    metadata: {
-
-                        name: path.basename(mapedFile).replace(/\..+$/g, ''),
-
-                        path: mapedFile
-                    }
-                });
-
-                break;
-
-            case 4:
-
-                loadedUserContextMenuCommands.push({
-
-                    ... data,
-
-                    metadata: {
-
-                        name: path.basename(mapedFile).replace(/\..+$/g, ''),
-
-                        path: mapedFile
-                    }
-                });
-
-                break;
-
-            case 5:
-
-                loadedMessageContextMenuCommands.push({
-
-                    ... data,
-
-                    metadata: {
-
-                        name: path.basename(mapedFile).replace(/\..+$/g, ''),
-
-                        path: mapedFile
-                    }
-                });
-
-                break;
-        }
-    }
-
-    return {
-
-        loadedEvents,
-        loadedServices,
-        loadedChatInputCommands,
-        loadedUserContextMenuCommands,
-        loadedMessageContextMenuCommands
-    };
+	return {
+		loadedEvents,
+		loadedServices,
+		loadedChatInputCommands,
+		loadedUserContextMenuCommands,
+		loadedMessageContextMenuCommands,
+	};
 }

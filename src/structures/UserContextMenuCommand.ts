@@ -1,80 +1,73 @@
 export interface UserContextMenuCommandOptions {
+	intents?: number;
 
-    intents?: number;
+	display: {
+		name: {
+			default: string;
 
-    display: {
+			[locale: string]: string;
+		};
 
-        name: {
+		permissions?: {
+			member?: bigint | null;
 
-            default: string;
+			dm?: boolean;
+			nsfw?: boolean;
+		};
+	};
 
-            [locale: string]: string;
-        };
-
-        permissions?: {
-
-            member?: bigint | null;
-
-            dm?:   boolean;
-            nsfw?: boolean;
-        };
-    };
-
-    events: { [event: string]: (parameters) => Promise<void> | void; };
+	events: { [event: string]: (parameters) => Promise<void> | void };
 }
 
 export class UserContextMenuCommandBuilder {
+	type = 4;
 
-    type = 4;
+	// https://discord.com/developers/docs/topics/gateway#gateway-intents
+	intents = 0;
 
-    // https://discord.com/developers/docs/topics/gateway#gateway-intents
-    intents = 0; 
+	display: {
+		type: number;
 
-    display: {
+		name: {
+			default: string;
 
-        type: number;
+			[locale: string]: string;
+		};
 
-        name: {
+		permissions: {
+			member: bigint | null;
 
-            default: string;
+			dm: boolean;
+			nsfw: boolean;
+		};
+	} = {
+		// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
+		type: 2,
 
-            [locale: string]: string;
-        };
+		name: { default: 'empty' },
 
-        permissions: {
+		permissions: {
+			member: null,
 
-            member: bigint | null;
+			dm: false,
+			nsfw: false,
+		},
+	};
 
-            dm:   boolean;
-            nsfw: boolean;
-        };
-    } = {
+	events;
 
-        // https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-types
-        type: 2,
+	constructor(data: UserContextMenuCommandOptions) {
+		this.intents = data.intents ?? this.intents;
 
-        name: { default: 'empty' },
+		this.display.name = data.display.name;
 
-        permissions: {
+		this.display.permissions.member =
+			data.display.permissions?.member ?? this.display.permissions.member;
+		this.display.permissions.dm =
+			data.display.permissions?.dm ?? this.display.permissions.dm;
+		this.display.permissions.nsfw =
+			data.display.permissions?.nsfw ?? this.display.permissions.nsfw;
 
-            member: null,
-
-            dm: false, nsfw: false
-        }
-    };
-
-    events;
-
-    constructor (data: UserContextMenuCommandOptions) {
-
-        this.intents = data.intents ?? this.intents;
-
-        this.display.name = data.display.name;
-
-        this.display.permissions.member = data.display.permissions?.member ?? this.display.permissions.member;
-        this.display.permissions.dm     = data.display.permissions?.dm     ?? this.display.permissions.dm;
-        this.display.permissions.nsfw   = data.display.permissions?.nsfw   ?? this.display.permissions.nsfw;
-
-        this.events = data.events;
-    }
+		this.events = data.events;
+	}
 }
